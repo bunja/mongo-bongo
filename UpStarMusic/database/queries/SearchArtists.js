@@ -13,12 +13,12 @@ module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
     //const sortOrder = {};
     //ortOrder[sortProperty] = 1;
 
-    const query = Artist.find({})
+    const query = Artist.find(buildQuery(criteria))
             .sort({ [sortProperty]: 1})//[sortProperty] - es6 interpolated keys
             .skip(offset)
             .limit(limit);
 
-    return Promise.all([query, Artist.count()])
+    return Promise.all([query, Artist.find(buildQuery(criteria)).count()])
         .then((results) => {
             return {
                 all: results[0],
@@ -29,4 +29,29 @@ module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
         });
 
 
+};
+// by default criteria has only a name appended to it
+const buildQuery = (criteria) => {
+    const query = {};
+
+    if(criteria.name) {
+        query.$text = { $search: criteria.name };
+    }
+
+    // if we touched age, age property will be appended to the criteria object
+    if(criteria.age) {
+        query.age = {
+            $gte: criteria.age.min,
+            $lte: criteria.age.max
+        };
+    }
+
+    if(criteria.yearsActive) {
+        query.yearsActive = {
+            $gte: criteria.yearsActive.min,
+            $lte: criteria.yearsActive.max
+        };
+    }
+
+    return query;
 };
