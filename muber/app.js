@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 routes(app);
 
 
-app.use((ee, req, res, next) => {
+app.use((err, req, res, next) => {
     res.send({error: err.message});
 });
 
