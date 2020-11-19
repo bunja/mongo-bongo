@@ -1,8 +1,64 @@
 const Driver = require('../models/driver');
 
+
+function geoNear(lng, lat) {
+    // return Driver.aggregate([
+    //     {
+    //       $geoNear: {
+    //         near: {
+    //           type: 'Point',
+    //           coordinates: [lng, lat],
+    //         },
+    //         spherical: true,
+    //         maxDistance: 200000,
+    //         distanceField: 'dist.calculated',
+    //       }
+    //     }
+    //   ]);
+
+    return Driver.find({
+        "geometry": {
+            "$near": {
+                "$geometery": {
+                    "type": "Point",
+                    "coordinates": [lng, lat],
+                },
+                "$maxDistance": 200000
+            }
+        }
+    });
+}
+
+
+// Model.find({
+//     "loc": { 
+//         "$near": {
+//             "$geometery": {
+//                 "type": "Point",
+//                 "coordinates": [ 10,10 ],
+//             },
+//             "$maxDistance": 20
+//         }
+//     }
+// },function(err,docs) {
+
+//     // do something here
+// });
+
 module.exports = {
     greeting(req, res) {
         res.send({hi: "there"});
+    },
+
+    index(req, res, next) {
+        const { lng, lat } = req.query;
+        // Driver.geoNear(
+        //     { type: 'Point', coordinates}
+        // )
+
+        geoNear( lng, lat)
+            .then(drivers => res.send(drivers))
+            .catch(next);
     },
 
     create(req, res, next) {
